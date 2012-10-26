@@ -83,7 +83,7 @@
     }
     
     double zoomScale = worldSize / maxSize;
-    zoomScale = ceil(log2(zoomScale));
+    zoomScale = floor(log2(zoomScale));
     
     return zoomScale;
 }
