@@ -1,6 +1,5 @@
 //
 //  RWMapView.h
-//  NorthWestEstate
 //
 //  Created by Anton Schukin on 10/15/12.
 //  Copyright (c) 2012 RealWeb. All rights reserved.
