@@ -14,8 +14,8 @@
 
 @optional
 
-- (void)mapViewWillChangeZoomScale:(MKMapView *)mapView;
-- (void)mapViewDidChangeZoomScale:(MKMapView *)mapView;
+- (void)mapViewWillChangeZoomLevel:(MKMapView *)mapView;
+- (void)mapViewDidChangeZoomLevel:(MKMapView *)mapView;
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForClusterAnnotation:(id<RWClusterAnnotation>)annotation;
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForCalloutAnnotation:(id<RWCalloutAnnotation>)annotation;
@@ -28,11 +28,11 @@
 
 @property (nonatomic, assign) id<RWMapViewDelegate> delegate;
 
-@property (nonatomic, readonly) NSInteger zoomScale;
-- (NSInteger)zoomScaleForMapRect:(MKMapRect)mapRect;
+@property (nonatomic, readonly) NSInteger zoomLevel;
+- (NSInteger)zoomLevelForMapRect:(MKMapRect)mapRect;
 
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomScale:(NSInteger)zoomScale;
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomScale:(NSInteger)zoomScale animated:(BOOL)animated;
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel;
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomLevel:(NSInteger)zoomLevel animated:(BOOL)animated;
 
 @property (nonatomic, assign) BOOL useCustomCalloutView;
 

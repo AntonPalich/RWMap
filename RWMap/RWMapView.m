@@ -9,7 +9,7 @@
 
 @interface RWMapView() {
     
-    NSInteger _currentZoomScale;
+    NSInteger _currentZoomLevel;
     
     id<RWMapViewDelegate> _delegate;
     
@@ -45,7 +45,7 @@
 {
     [super setDelegate:self];
     
-    _currentZoomScale = 0;
+    _currentZoomLevel = 0;
     
     self.useClusters = NO;
     self.useCustomCalloutView = NO;
@@ -53,9 +53,9 @@
     self.distanceForClustering = 100;
 }
 #pragma mark - Properties
-- (NSInteger)zoomScale
+- (NSInteger)zoomLevel
 {
-    return _currentZoomScale;
+    return _currentZoomLevel;
 }
 
 - (id<RWMapViewDelegate>)delegate
@@ -69,7 +69,7 @@
 }
 
 #pragma mark - Class methods
-- (NSInteger)zoomScaleForMapRect:(MKMapRect)mapRect
+- (NSInteger)zoomLevelForMapRect:(MKMapRect)mapRect
 {
     CGFloat maxSize = MAX(mapRect.size.width, mapRect.size.height);
     
@@ -81,10 +81,10 @@
         worldSize = MKMapRectWorld.size.height;
     }
     
-    double zoomScale = worldSize / maxSize;
-    zoomScale = floor(log2(zoomScale));
+    double zoomLevel = worldSize / maxSize;
+    zoomLevel = floor(log2(zoomLevel));
     
-    return zoomScale;
+    return zoomLevel;
 }
 
 - (void)addAnnotations:(NSArray *)annotations {
@@ -105,12 +105,12 @@
 }
 
 #pragma mark - Setting map center
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomScale:(NSInteger)zoomScale
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel
 {
-    [self setCenterCoordinate:centerCoordinate zoomScale:zoomScale animated:NO];
+    [self setCenterCoordinate:centerCoordinate zoomLevel:zoomLevel animated:NO];
 }
 
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomScale:(NSInteger)zoomScale animated:(BOOL)animated
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomLevel:(NSInteger)zoomLevel animated:(BOOL)animated
 {
     NSInteger minZoomLevel;
 
@@ -120,8 +120,8 @@
         minZoomLevel = 0;
     }
     
-    float newZoomScale = MIN(MAX(minZoomLevel, zoomScale), 18);
-    double zoomFactor = pow(2, newZoomScale);
+    float newZoomLevel = MIN(MAX(minZoomLevel, zoomLevel), 18);
+    double zoomFactor = pow(2, newZoomLevel);
     
     // Set size
     MKMapRect newVisibleRect;
@@ -163,18 +163,18 @@
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    float zoomScale = [self zoomScaleForMapRect:[mapView visibleMapRect]];
+    float zoomLevel = [self zoomLevelForMapRect:[mapView visibleMapRect]];
     
-    if (_currentZoomScale != zoomScale) {
+    if (_currentZoomLevel != zoomLevel) {
         
-        if ([_delegate respondsToSelector:@selector(mapViewWillChangeZoomScale:)]) {
-            [_delegate mapViewWillChangeZoomScale:mapView];
+        if ([_delegate respondsToSelector:@selector(mapViewWillChangeZoomLevel:)]) {
+            [_delegate mapViewWillChangeZoomLevel:mapView];
         }
         
-        _currentZoomScale = zoomScale;
+        _currentZoomLevel = zoomLevel;
         
-        if ([_delegate respondsToSelector:@selector(mapViewDidChangeZoomScale:)]) {
-            [_delegate mapViewDidChangeZoomScale:mapView];
+        if ([_delegate respondsToSelector:@selector(mapViewDidChangeZoomLevel:)]) {
+            [_delegate mapViewDidChangeZoomLevel:mapView];
         }
     }
     

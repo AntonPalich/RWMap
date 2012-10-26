@@ -38,8 +38,7 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-//    return UIInterfaceOrientationIsLandscape(toInterfaceOrientation);
-    return YES;
+    return UIInterfaceOrientationIsLandscape(toInterfaceOrientation);
 }
 
 - (BOOL)shouldAutorotate
@@ -67,12 +66,12 @@
 #pragma mark - Actions
 - (void)zoomIn:(id)sender
 {
-    [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomScale:self.mapView.zoomScale + 1 animated:YES];
+    [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomLevel:self.mapView.zoomLevel + 1 animated:YES];
 }
 
 - (void)zoomOut:(id)sender
 {
-    [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomScale:self.mapView.zoomScale - 1 animated:YES];
+    [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomLevel:self.mapView.zoomLevel - 1 animated:YES];
 
 }
 
