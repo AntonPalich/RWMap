@@ -52,6 +52,7 @@
     
     self.distanceForClustering = 100;
 }
+
 #pragma mark - Properties
 - (NSInteger)zoomLevel
 {

@@ -58,7 +58,7 @@
 }
 
 #pragma mark - RWMapViewDelegate methods
-- (void)mapViewDidChangeZoomScale:(MKMapView *)mapView
+- (void)mapViewDidChangeZoomLevel:(MKMapView *)mapView
 {
     self.zoomValueLabel.text = [NSString stringWithFormat:@"%d", self.mapView.zoomLevel];
 }
