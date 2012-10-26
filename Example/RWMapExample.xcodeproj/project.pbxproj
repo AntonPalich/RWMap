@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		304223FD16391F7400A9872A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 304223FC16391F7400A9872A /* SystemConfiguration.framework */; };
+		304223FF16391F7900A9872A /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 304223FE16391F7900A9872A /* MobileCoreServices.framework */; };
 		30B2BC2A16368530007708DE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B2BC2916368530007708DE /* UIKit.framework */; };
 		30B2BC2C16368530007708DE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B2BC2B16368530007708DE /* Foundation.framework */; };
 		30B2BC2E16368530007708DE /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B2BC2D16368530007708DE /* CoreGraphics.framework */; };
@@ -16,15 +18,17 @@
 		30B2BC3C16368530007708DE /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B2BC3B16368530007708DE /* Default.png */; };
 		30B2BC3E16368530007708DE /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B2BC3D16368530007708DE /* Default@2x.png */; };
 		30B2BC4016368530007708DE /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30B2BC3F16368530007708DE /* Default-568h@2x.png */; };
-		30B2BC5316368567007708DE /* RWMapView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30B2BC5216368567007708DE /* RWMapView.m */; };
 		30B2BC5B163686D1007708DE /* RWMapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 30B2BC59163686D1007708DE /* RWMapViewController.m */; };
 		30B2BC5C163686D1007708DE /* RWMapViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 30B2BC5A163686D1007708DE /* RWMapViewController.xib */; };
 		30B2BC5E16368782007708DE /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B2BC5D16368782007708DE /* MapKit.framework */; };
-		30B2BC6016368BA2007708DE /* README.MD in Resources */ = {isa = PBXBuildFile; fileRef = 30B2BC5F16368BA2007708DE /* README.MD */; };
 		30B2BC6216368F1E007708DE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B2BC6116368F1E007708DE /* QuartzCore.framework */; };
+		30B2BC7B1637D32A007708DE /* RWMapView.m in Sources */ = {isa = PBXBuildFile; fileRef = 30B2BC7A1637D32A007708DE /* RWMapView.m */; };
+		30B2BC7D1637F760007708DE /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30B2BC7C1637F75F007708DE /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		304223FC16391F7400A9872A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		304223FE16391F7900A9872A /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		30B2BC2516368530007708DE /* RWMapExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RWMapExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30B2BC2916368530007708DE /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		30B2BC2B16368530007708DE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -38,17 +42,17 @@
 		30B2BC3B16368530007708DE /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		30B2BC3D16368530007708DE /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		30B2BC3F16368530007708DE /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		30B2BC4E16368567007708DE /* RWAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWAnnotationView.h; sourceTree = "<group>"; };
-		30B2BC4F16368567007708DE /* RWCalloutAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWCalloutAnnotation.h; sourceTree = "<group>"; };
-		30B2BC5016368567007708DE /* RWClusterAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWClusterAnnotation.h; sourceTree = "<group>"; };
-		30B2BC5116368567007708DE /* RWMapView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWMapView.h; sourceTree = "<group>"; };
-		30B2BC5216368567007708DE /* RWMapView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWMapView.m; sourceTree = "<group>"; };
 		30B2BC58163686D1007708DE /* RWMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RWMapViewController.h; path = Classes/RWMapViewController.h; sourceTree = "<group>"; };
 		30B2BC59163686D1007708DE /* RWMapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RWMapViewController.m; path = Classes/RWMapViewController.m; sourceTree = "<group>"; };
 		30B2BC5A163686D1007708DE /* RWMapViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RWMapViewController.xib; path = Classes/RWMapViewController.xib; sourceTree = "<group>"; };
 		30B2BC5D16368782007708DE /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
-		30B2BC5F16368BA2007708DE /* README.MD */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.MD; sourceTree = SOURCE_ROOT; };
 		30B2BC6116368F1E007708DE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		30B2BC761637D32A007708DE /* RWAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RWAnnotationView.h; path = ../RWMap/RWAnnotationView.h; sourceTree = SOURCE_ROOT; };
+		30B2BC771637D32A007708DE /* RWCalloutAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWCalloutAnnotation.h; sourceTree = "<group>"; };
+		30B2BC781637D32A007708DE /* RWClusterAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWClusterAnnotation.h; sourceTree = "<group>"; };
+		30B2BC791637D32A007708DE /* RWMapView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWMapView.h; sourceTree = "<group>"; };
+		30B2BC7A1637D32A007708DE /* RWMapView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWMapView.m; sourceTree = "<group>"; };
+		30B2BC7C1637F75F007708DE /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +60,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				304223FF16391F7900A9872A /* MobileCoreServices.framework in Frameworks */,
+				304223FD16391F7400A9872A /* SystemConfiguration.framework in Frameworks */,
+				30B2BC7D1637F760007708DE /* CoreLocation.framework in Frameworks */,
 				30B2BC6216368F1E007708DE /* QuartzCore.framework in Frameworks */,
 				30B2BC5E16368782007708DE /* MapKit.framework in Frameworks */,
 				30B2BC2A16368530007708DE /* UIKit.framework in Frameworks */,
@@ -70,9 +77,8 @@
 		30B2BC1A16368530007708DE = {
 			isa = PBXGroup;
 			children = (
-				30B2BC5F16368BA2007708DE /* README.MD */,
+				30B2BC8D16391E05007708DE /* Libraries */,
 				30B2BC57163686A8007708DE /* Classes */,
-				30B2BC4D16368567007708DE /* RWMap */,
 				30B2BC2F16368530007708DE /* RWMapExample */,
 				30B2BC2816368530007708DE /* Frameworks */,
 				30B2BC2616368530007708DE /* Products */,
@@ -90,6 +96,9 @@
 		30B2BC2816368530007708DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				304223FE16391F7900A9872A /* MobileCoreServices.framework */,
+				304223FC16391F7400A9872A /* SystemConfiguration.framework */,
+				30B2BC7C1637F75F007708DE /* CoreLocation.framework */,
 				30B2BC6116368F1E007708DE /* QuartzCore.framework */,
 				30B2BC5D16368782007708DE /* MapKit.framework */,
 				30B2BC2916368530007708DE /* UIKit.framework */,
@@ -123,18 +132,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		30B2BC4D16368567007708DE /* RWMap */ = {
-			isa = PBXGroup;
-			children = (
-				30B2BC4E16368567007708DE /* RWAnnotationView.h */,
-				30B2BC4F16368567007708DE /* RWCalloutAnnotation.h */,
-				30B2BC5016368567007708DE /* RWClusterAnnotation.h */,
-				30B2BC5116368567007708DE /* RWMapView.h */,
-				30B2BC5216368567007708DE /* RWMapView.m */,
-			);
-			path = RWMap;
-			sourceTree = "<group>";
-		};
 		30B2BC57163686A8007708DE /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -143,6 +140,27 @@
 				30B2BC5A163686D1007708DE /* RWMapViewController.xib */,
 			);
 			name = Classes;
+			sourceTree = "<group>";
+		};
+		30B2BC751637D32A007708DE /* RWMap */ = {
+			isa = PBXGroup;
+			children = (
+				30B2BC761637D32A007708DE /* RWAnnotationView.h */,
+				30B2BC771637D32A007708DE /* RWCalloutAnnotation.h */,
+				30B2BC781637D32A007708DE /* RWClusterAnnotation.h */,
+				30B2BC791637D32A007708DE /* RWMapView.h */,
+				30B2BC7A1637D32A007708DE /* RWMapView.m */,
+			);
+			name = RWMap;
+			path = ../RWMap;
+			sourceTree = "<group>";
+		};
+		30B2BC8D16391E05007708DE /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				30B2BC751637D32A007708DE /* RWMap */,
+			);
+			name = Libraries;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -202,7 +220,6 @@
 				30B2BC3E16368530007708DE /* Default@2x.png in Resources */,
 				30B2BC4016368530007708DE /* Default-568h@2x.png in Resources */,
 				30B2BC5C163686D1007708DE /* RWMapViewController.xib in Resources */,
-				30B2BC6016368BA2007708DE /* README.MD in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,8 +232,8 @@
 			files = (
 				30B2BC3616368530007708DE /* main.m in Sources */,
 				30B2BC3A16368530007708DE /* RWAppDelegate.m in Sources */,
-				30B2BC5316368567007708DE /* RWMapView.m in Sources */,
 				30B2BC5B163686D1007708DE /* RWMapViewController.m in Sources */,
+				30B2BC7B1637D32A007708DE /* RWMapView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,7 +308,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "RWMapExample/RWMapExample-Prefix.pch";
 				INFOPLIST_FILE = "RWMapExample/RWMapExample-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 2;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -302,7 +321,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "RWMapExample/RWMapExample-Prefix.pch";
 				INFOPLIST_FILE = "RWMapExample/RWMapExample-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 2;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -326,6 +347,7 @@
 				30B2BC4516368530007708DE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

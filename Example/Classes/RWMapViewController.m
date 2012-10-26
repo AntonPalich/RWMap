@@ -7,9 +7,10 @@
 //
 
 #import "RWMapViewController.h"
-#import <QuartzCore/QuartzCore.h>
 
-@interface RWMapViewController ()
+@interface RWMapViewController () {
+    NSTimer *_updateUITimer;
+}
 
 @end
 
@@ -25,23 +26,64 @@
     _propertiesView.layer.borderWidth = 1;
     _propertiesView.layer.borderColor = [UIColor blackColor].CGColor;
     
+    _updateUITimer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(updateUI) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:_updateUITimer forMode:NSRunLoopCommonModes];
+    
 }
 
-- (void)didReceiveMemoryWarning
+- (void)dealloc
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    [_updateUITimer invalidate];
 }
 
-#pragma mark - RWMapViewDelegate methods
-- (void)mapViewWillChangeZoomScale:(MKMapView *)mapView
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+{
+//    return UIInterfaceOrientationIsLandscape(toInterfaceOrientation);
+    return YES;
+}
+
+- (BOOL)shouldAutorotate
+{
+    return YES;
+}
+
+#pragma mark - MKMapViewDelegate methods
+- (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated
+{    
+
+}
+
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
     
 }
 
+#pragma mark - RWMapViewDelegate methods
 - (void)mapViewDidChangeZoomScale:(MKMapView *)mapView
 {
-    self.zoomValueLabel.text = [NSString stringWithFormat:@"%d", self.mapView.zoomScale];
+    self.zoomValueLabel.text = [NSString stringWithFormat:@"%d", self.mapView.zoomLevel];
+}
+
+#pragma mark - Actions
+- (void)zoomIn:(id)sender
+{
+    [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomScale:self.mapView.zoomScale + 1 animated:YES];
+}
+
+- (void)zoomOut:(id)sender
+{
+    [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomScale:self.mapView.zoomScale - 1 animated:YES];
+
+}
+
+#pragma mark - Helpers
+- (void)updateUI
+{
+    self.centerLatitudeLabel.text = [NSString stringWithFormat:@"%f", self.mapView.region.center.latitude];
+    self.centerLongitudeLabel.text = [NSString stringWithFormat:@"%f", self.mapView.region.center.longitude];
+    
+    self.spanLatitudeLabel.text = [NSString stringWithFormat:@"%f", self.mapView.region.span.latitudeDelta];
+    self.spanLongitudeLabel.text = [NSString stringWithFormat:@"%f", self.mapView.region.span.longitudeDelta];
 }
 
 @end

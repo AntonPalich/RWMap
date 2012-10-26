@@ -12,7 +12,16 @@
 @interface RWMapViewController : UIViewController <RWMapViewDelegate>
 
 @property (nonatomic, readonly) IBOutlet UIView *propertiesView;
+
 @property (nonatomic, readonly) IBOutlet UILabel *zoomValueLabel;
+@property (nonatomic, readonly) IBOutlet UILabel *centerLatitudeLabel;
+@property (nonatomic, readonly) IBOutlet UILabel *centerLongitudeLabel;
+@property (nonatomic, readonly) IBOutlet UILabel *spanLatitudeLabel;
+@property (nonatomic, readonly) IBOutlet UILabel *spanLongitudeLabel;
+
 @property (nonatomic, readonly) IBOutlet RWMapView *mapView;
+
+- (IBAction)zoomIn:(id)sender;
+- (IBAction)zoomOut:(id)sender;
 
 @end
