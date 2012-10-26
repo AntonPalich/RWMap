@@ -29,8 +29,11 @@
 
 @property (nonatomic, assign) id<RWMapViewDelegate> delegate;
 
-@property (nonatomic, readonly) NSUInteger zoomScale;
-- (NSUInteger)zoomScaleForMapRect:(MKMapRect)mapRect;
+@property (nonatomic, readonly) NSInteger zoomScale;
+- (NSInteger)zoomScaleForMapRect:(MKMapRect)mapRect;
+
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomScale:(NSInteger)zoomScale;
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomScale:(NSInteger)zoomScale animated:(BOOL)animated;
 
 @property (nonatomic, assign) BOOL useCustomCalloutView;
 

@@ -10,7 +10,7 @@
 
 @interface RWMapView() {
     
-    NSUInteger _currentZoomScale;
+    NSInteger _currentZoomScale;
     
     id<RWMapViewDelegate> _delegate;
     
@@ -54,7 +54,7 @@
     self.distanceForClustering = 100;
 }
 #pragma mark - Properties
-- (NSUInteger)zoomScale
+- (NSInteger)zoomScale
 {
     return _currentZoomScale;
 }
@@ -70,7 +70,7 @@
 }
 
 #pragma mark - Class methods
-- (NSUInteger)zoomScaleForMapRect:(MKMapRect)mapRect
+- (NSInteger)zoomScaleForMapRect:(MKMapRect)mapRect
 {
     CGFloat maxSize = MAX(mapRect.size.width, mapRect.size.height);
     
@@ -85,7 +85,7 @@
     double zoomScale = worldSize / maxSize;
     zoomScale = ceil(log2(zoomScale));
     
-    return (NSUInteger)zoomScale;
+    return zoomScale;
 }
 
 - (void)addAnnotations:(NSArray *)annotations {
@@ -105,6 +105,55 @@
     [super addAnnotations:annotations];
 }
 
+#pragma mark - Setting map center
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomScale:(NSInteger)zoomScale
+{
+    [self setCenterCoordinate:centerCoordinate zoomScale:zoomScale animated:NO];
+}
+
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomScale:(NSInteger)zoomScale animated:(BOOL)animated
+{
+    NSInteger minZoomLevel;
+
+    if ([[[UIDevice currentDevice] systemVersion] compare:@"6.0" options:NSNumericSearch] != NSOrderedAscending) {
+        minZoomLevel = 1;
+    } else {
+        minZoomLevel = 0;
+    }
+    
+    float newZoomScale = MIN(MAX(minZoomLevel, zoomScale), 18);
+    double zoomFactor = pow(2, newZoomScale);
+    
+    // Set size
+    MKMapRect newVisibleRect;
+    
+    if (self.visibleMapRect.size.width > self.visibleMapRect.size.height) {
+        newVisibleRect = MKMapRectMake(0, 0, MKMapRectWorld.size.width / zoomFactor, 0);
+    } else {
+        newVisibleRect = MKMapRectMake(0, 0, 0, MKMapRectWorld.size.height / zoomFactor);
+    }
+    
+    newVisibleRect = [self mapRectThatFits:newVisibleRect];
+    
+    // Set origin
+    MKMapPoint newCenterPoint = MKMapPointForCoordinate(coordinate);
+    newVisibleRect = MKMapRectMake(newCenterPoint.x - newVisibleRect.size.width / 2,
+                                   newCenterPoint.y - newVisibleRect.size.height / 2,
+                                   // FIX: - 1 fixing iOS 6 MapKit bug
+                                   newVisibleRect.size.width - 1,
+                                   newVisibleRect.size.height);
+    
+    NSLog(@"visible before: x: %f y: %f width: %f height: %f", self.visibleMapRect.origin.x, self.visibleMapRect.origin.y, self.visibleMapRect.size.width, self.visibleMapRect.size.height);
+    NSLog(@"new:     x: %f y: %f width: %f height: %f", newVisibleRect.origin.x, newVisibleRect.origin.y, newVisibleRect.size.width, newVisibleRect.size.height);
+    NSLog(@"world:   x: %f y: %f width: %f height: %f", MKMapRectWorld.origin.x, MKMapRectWorld.origin.y, MKMapRectWorld.size.width, MKMapRectWorld.size.height);
+    
+    [self setVisibleMapRect:newVisibleRect animated:animated];
+    
+    NSLog(@"visible after : x: %f y: %f width: %f height: %f", self.visibleMapRect.origin.x, self.visibleMapRect.origin.y, self.visibleMapRect.size.width, self.visibleMapRect.size.height);
+    NSLog(@" ");
+
+}
+
 #pragma mark - Responding to Map Position Changes
 - (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated
 {
@@ -115,7 +164,7 @@
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    NSUInteger zoomScale = [self zoomScaleForMapRect:[mapView visibleMapRect]];
+    float zoomScale = [self zoomScaleForMapRect:[mapView visibleMapRect]];
     
     if (_currentZoomScale != zoomScale) {
         
