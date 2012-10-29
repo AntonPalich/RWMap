@@ -24,4 +24,7 @@
 - (IBAction)zoomIn:(id)sender;
 - (IBAction)zoomOut:(id)sender;
 
+- (IBAction)generateAnnotations:(id)sender;
+- (IBAction)removeAnnotations:(id)sender;
+
 @end

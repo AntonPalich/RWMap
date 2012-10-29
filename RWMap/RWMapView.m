@@ -416,15 +416,13 @@
 
                 id<RWClusterAnnotation> cluster;
                 
-                if ([_delegate respondsToSelector:@selector(mapViewAnnotationForClustering:)]) {
-                    
-                    NSMutableArray *containedAnnotations = [NSMutableArray arrayWithArray:neighbours];
-                    [containedAnnotations addObject:ann];
-                    
-                    cluster = [_delegate mapViewAnnotationForClustering:self];
-                    cluster.containedAnnotations = [NSArray arrayWithArray:containedAnnotations];
-
-                }
+                NSAssert([_delegate respondsToSelector:@selector(mapViewAnnotationForClustering:)], @"Delegate should return view for clustering");
+                                    
+                NSMutableArray *containedAnnotations = [NSMutableArray arrayWithArray:neighbours];
+                [containedAnnotations addObject:ann];
+                
+                cluster = [_delegate mapViewAnnotationForClustering:self];
+                cluster.containedAnnotations = [NSArray arrayWithArray:containedAnnotations];
                 
                 [finalAnns addObject:cluster];
                 
