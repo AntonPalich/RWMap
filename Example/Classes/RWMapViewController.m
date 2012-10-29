@@ -8,6 +8,9 @@
 
 #import "RWMapViewController.h"
 
+#import "RWBasicAnnotation.h"
+#import "RWBasicClusterAnnotation.h"
+
 @interface RWMapViewController () {
     NSTimer *_updateUITimer;
 }
@@ -21,6 +24,7 @@
     [super viewDidLoad];
     
     _mapView.delegate = self;
+    _mapView.useClusters = YES;
     
     _propertiesView.layer.cornerRadius = 7.0f;
     _propertiesView.layer.borderWidth = 1;
@@ -38,7 +42,7 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    return UIInterfaceOrientationIsLandscape(toInterfaceOrientation);
+    return YES;
 }
 
 - (BOOL)shouldAutorotate
@@ -47,14 +51,9 @@
 }
 
 #pragma mark - MKMapViewDelegate methods
-- (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated
-{    
-
-}
-
-- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
+- (id<RWClusterAnnotation>)mapViewAnnotationForClustering:(MKMapView *)mapView
 {
-    
+    return [RWBasicClusterAnnotation new];
 }
 
 #pragma mark - RWMapViewDelegate methods
@@ -73,6 +72,39 @@
 {
     [self.mapView setCenterCoordinate:self.mapView.centerCoordinate zoomLevel:self.mapView.zoomLevel - 1 animated:YES];
 
+}
+
+- (void)generateAnnotations:(id)sender
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+       
+        NSMutableArray *annotations = [[NSMutableArray alloc] init];
+        
+        for (int i = 0; i < 1000; i++) {
+            
+            double latitude = 0.0;
+            double longitude = 0.0;
+            
+            CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
+            
+            RWBasicAnnotation *annotation = [[RWBasicAnnotation alloc] initWithCoordinate:coordinate];
+            [annotations addObject:annotation];
+            
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            [self.mapView addAnnotations:annotations];
+            
+        });
+        
+    });
+    
+}
+
+- (void)removeAnnotations:(id)sender
+{
+    [self.mapView removeAnnotations:self.mapView.annotations];
 }
 
 #pragma mark - Helpers
