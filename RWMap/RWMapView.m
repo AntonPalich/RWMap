@@ -113,24 +113,26 @@
 
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomLevel:(NSInteger)zoomLevel animated:(BOOL)animated
 {
-    NSInteger minZoomLevel;
 
-    if ([[[UIDevice currentDevice] systemVersion] compare:@"6.0" options:NSNumericSearch] != NSOrderedAscending) {
-        minZoomLevel = 1;
+    // FIX: difference behavior for difference orientations and interface idioms
+    int interfaceOrientationFactor;
+    
+    if (UIInterfaceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation) && [[UIDevice currentDevice] userInterfaceIdiom] != UIUserInterfaceIdiomPhone) {
+        interfaceOrientationFactor = 0;
     } else {
-        minZoomLevel = 0;
+        interfaceOrientationFactor = 1;
     }
     
-    float newZoomLevel = MIN(MAX(minZoomLevel, zoomLevel), 18);
+    float newZoomLevel = MIN(MAX(0, zoomLevel), 18) + interfaceOrientationFactor;
     double zoomFactor = pow(2, newZoomLevel);
     
     // Set size
     MKMapRect newVisibleRect;
     
     if (self.visibleMapRect.size.width > self.visibleMapRect.size.height) {
-        newVisibleRect = MKMapRectMake(0, 0, MKMapRectWorld.size.width / zoomFactor, 0);
+        newVisibleRect = MKMapRectMake(0, 0, MKMapRectWorld.size.width / zoomFactor, 0.1);
     } else {
-        newVisibleRect = MKMapRectMake(0, 0, 0, MKMapRectWorld.size.height / zoomFactor);
+        newVisibleRect = MKMapRectMake(0, 0, 0.1, MKMapRectWorld.size.height / zoomFactor);
     }
     
     newVisibleRect = [self mapRectThatFits:newVisibleRect];
@@ -143,14 +145,7 @@
                                    newVisibleRect.size.width - 1,
                                    newVisibleRect.size.height);
     
-    NSLog(@"visible before: x: %f y: %f width: %f height: %f", self.visibleMapRect.origin.x, self.visibleMapRect.origin.y, self.visibleMapRect.size.width, self.visibleMapRect.size.height);
-    NSLog(@"new:     x: %f y: %f width: %f height: %f", newVisibleRect.origin.x, newVisibleRect.origin.y, newVisibleRect.size.width, newVisibleRect.size.height);
-    NSLog(@"world:   x: %f y: %f width: %f height: %f", MKMapRectWorld.origin.x, MKMapRectWorld.origin.y, MKMapRectWorld.size.width, MKMapRectWorld.size.height);
-    
     [self setVisibleMapRect:newVisibleRect animated:animated];
-    
-    NSLog(@"visible after : x: %f y: %f width: %f height: %f", self.visibleMapRect.origin.x, self.visibleMapRect.origin.y, self.visibleMapRect.size.width, self.visibleMapRect.size.height);
-    NSLog(@" ");
 
 }
 
