@@ -315,23 +315,16 @@
 
 #pragma mark - Clustering
 - (float) approxDistanceCoord1:(CLLocationCoordinate2D)coord1 coord2:(CLLocationCoordinate2D)coord2 {
-
-    CGPoint pt1;
-    CGFloat zoomFactor =  self.visibleMapRect.size.width / self.bounds.size.width;
-    MKMapPoint mapPoint1 = MKMapPointForCoordinate(coord1);
-    pt1.x = mapPoint1.x/zoomFactor;
-    pt1.y = mapPoint1.y/zoomFactor;
     
-    CGPoint pt2;
-    MKMapPoint mapPoint2 = MKMapPointForCoordinate(coord2);
-    pt2.x = mapPoint2.x/zoomFactor;
-    pt2.y = mapPoint2.y/zoomFactor;
-    
+    CGPoint pt1 = [self convertCoordinate:coord1 toPointToView:self];
+    CGPoint pt2 = [self convertCoordinate:coord2 toPointToView:self];
     
     int dx = (int)pt1.x - (int)pt2.x;
     int dy = (int)pt1.y - (int)pt2.y;
+    
     dx = abs(dx);
     dy = abs(dy);
+    
     if ( dx < dy ) {
         return dx + dy - (dx >> 1);
     } else {
@@ -351,10 +344,10 @@
 
 - (NSArray*) findNeighboursForAnnotation:(id<MKAnnotation>)ann inNeighbourdhood:(NSArray*)neighbourhood withDistance:(float)distance
 {
-    
     NSMutableArray *result = [NSMutableArray array];
-    for (id<MKAnnotation> k in neighbourhood)
-    {
+    
+    for (id<MKAnnotation> k in neighbourhood) {
+        
         if (k == ann) {
             continue;
         }
@@ -378,10 +371,8 @@
 
 - (void) clustersForAnnotations:(NSArray*)annotations distance:(float)distance completion:(void (^)(NSArray *data))block {
     
-    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-    
-    [queue addOperationWithBlock:^{
-        
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+       
         NSMutableArray *processed = [NSMutableArray array];
         NSMutableArray *restOfAnnotations = [NSMutableArray arrayWithArray:annotations];
         NSMutableArray *finalAnns = [NSMutableArray array];
@@ -408,7 +399,7 @@
             } else {
                 
                 [processed addObjectsFromArray:neighbours];
-
+                
                 id<RWClusterAnnotation> cluster;
                 
                 NSAssert([_delegate respondsToSelector:@selector(mapViewAnnotationForClustering:)], @"Delegate should return view for clustering");
@@ -424,12 +415,17 @@
             }
             
             [restOfAnnotations removeObjectsInArray:processed];
+                        
         }
         
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            NSLog(@"meat time: %f", meanTimeInterval / meanCounter);
             block(finalAnns);
-        }];
+
+        });
         
-    }];
+    });
+        
 }
 @end
