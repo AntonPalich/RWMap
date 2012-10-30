@@ -20,7 +20,7 @@
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForClusterAnnotation:(id<RWClusterAnnotation>)annotation;
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForCalloutAnnotation:(id<RWCalloutAnnotation>)annotation;
 
-- (id<RWClusterAnnotation>)mapViewAnnotationForClustering:(MKMapView *)mapView;
+- (id<RWClusterAnnotation>)mapView:(MKMapView *)mapView clusterAnnotationForAnnotations:(NSArray *)annotations;
 
 @end
 

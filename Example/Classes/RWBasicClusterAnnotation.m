@@ -21,6 +21,17 @@
     return self;
 }
 
+- (id)initWithContainedAnnotations:(NSArray *)containedAnnotations
+{
+    self = [super init];
+    
+    if (self) {
+        self.containedAnnotations = containedAnnotations;
+    }
+    
+    return self;
+}
+
 - (void)setContainedAnnotations:(NSArray *)containedAnnotations
 {
     if (containedAnnotations == _containedAnnotations) return;

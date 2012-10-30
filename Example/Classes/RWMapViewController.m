@@ -51,9 +51,9 @@
 }
 
 #pragma mark - MKMapViewDelegate methods
-- (id<RWClusterAnnotation>)mapViewAnnotationForClustering:(MKMapView *)mapView
+- (id<RWClusterAnnotation>)mapView:(MKMapView *)mapView clusterAnnotationForAnnotations:(NSArray *)annotations
 {
-    return [RWBasicClusterAnnotation new];
+    return [[RWBasicClusterAnnotation alloc] initWithContainedAnnotations:annotations];
 }
 
 #pragma mark - RWMapViewDelegate methods

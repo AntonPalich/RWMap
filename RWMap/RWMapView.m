@@ -402,13 +402,12 @@
                 
                 id<RWClusterAnnotation> cluster;
                 
-                NSAssert([_delegate respondsToSelector:@selector(mapViewAnnotationForClustering:)], @"Delegate should return view for clustering");
+                NSAssert([_delegate respondsToSelector:@selector(mapView:clusterAnnotationForAnnotations:)], @"Delegate should return view for clustering");
                                     
                 NSMutableArray *containedAnnotations = [NSMutableArray arrayWithArray:neighbours];
                 [containedAnnotations addObject:ann];
                 
-                cluster = [_delegate mapViewAnnotationForClustering:self];
-                cluster.containedAnnotations = [NSArray arrayWithArray:containedAnnotations];
+                cluster = [_delegate mapView:self clusterAnnotationForAnnotations:containedAnnotations];
                 
                 [finalAnns addObject:cluster];
                 
@@ -420,7 +419,6 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            NSLog(@"meat time: %f", meanTimeInterval / meanCounter);
             block(finalAnns);
 
         });
