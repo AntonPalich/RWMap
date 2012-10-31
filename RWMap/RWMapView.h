@@ -37,7 +37,9 @@
 @property (nonatomic, assign) BOOL useCustomCalloutView;
 
 @property (nonatomic, assign) BOOL useClusters;
-@property (nonatomic, assign) float distanceForClustering;
+@property (nonatomic, assign) float clusterRadius;
+
+- (void)removeAllAnnotations;
 
 @end
 

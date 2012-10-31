@@ -13,7 +13,6 @@
 
 @interface RWMapViewController () {
     NSTimer *_updateUITimer;
-    NSArray *_annotations;
 }
 
 @end
@@ -26,7 +25,7 @@
     
     _mapView.delegate = self;
     _mapView.useClusters = YES;
-    _mapView.distanceForClustering = 100;
+    _mapView.clusterRadius = 100;
     
     _propertiesView.layer.cornerRadius = 7.0f;
     _propertiesView.layer.borderWidth = 1;
@@ -62,9 +61,6 @@
 - (void)mapViewDidChangeZoomLevel:(MKMapView *)mapView
 {
     self.zoomValueLabel.text = [NSString stringWithFormat:@"%d", self.mapView.zoomLevel];
-    
-    [self.mapView removeAnnotations:self.mapView.annotations];
-    [self.mapView addAnnotations:_annotations];
 }
 
 #pragma mark - Actions
@@ -99,8 +95,7 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            _annotations = [NSArray arrayWithArray:annotations];
-            [self.mapView addAnnotations:_annotations];
+            [self.mapView addAnnotations:annotations];
             
         });
         
@@ -121,6 +116,8 @@
     
     self.spanLatitudeLabel.text = [NSString stringWithFormat:@"%f", self.mapView.region.span.latitudeDelta];
     self.spanLongitudeLabel.text = [NSString stringWithFormat:@"%f", self.mapView.region.span.longitudeDelta];
+    
+    self.annotationsLabel.text = [NSString stringWithFormat:@"%d", self.mapView.annotations.count];
 }
 
 @end

@@ -18,6 +18,7 @@
 @property (nonatomic, readonly) IBOutlet UILabel *centerLongitudeLabel;
 @property (nonatomic, readonly) IBOutlet UILabel *spanLatitudeLabel;
 @property (nonatomic, readonly) IBOutlet UILabel *spanLongitudeLabel;
+@property (nonatomic, readonly) IBOutlet UILabel *annotationsLabel;
 
 @property (nonatomic, readonly) IBOutlet RWMapView *mapView;
 

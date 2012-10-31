@@ -7,12 +7,17 @@
 
 #import "RWMapView.h"
 
+#import "RWClusterOperation.h"
+
 @interface RWMapView() {
     
     NSInteger _currentZoomLevel;
     
     id<RWMapViewDelegate> _delegate;
     
+    NSMutableArray *_cachedAnnotations;
+    
+    NSOperationQueue *_clusterOperationQueue;
 }
 
 @end
@@ -50,7 +55,10 @@
     self.useClusters = NO;
     self.useCustomCalloutView = NO;
     
-    self.distanceForClustering = 100;
+    self.clusterRadius = 100;
+    
+    _cachedAnnotations = [NSMutableArray new];
+    _clusterOperationQueue = [[NSOperationQueue alloc] init];
 }
 
 #pragma mark - Properties
@@ -92,19 +100,108 @@
     
     if (self.useClusters) {
         
-        [self clustersForAnnotations:annotations distance:self.distanceForClustering completion:^(NSArray *data) {
-            
-            [super removeAnnotations:[super annotations]];
-            [super addAnnotations:data];
-            
-        }];
+        [self addClusterAnnotations:annotations];
         
-        return;
-    }
+    } else {
     
-    [super addAnnotations:annotations];
+        [super addAnnotations:annotations];
+        
+    }
 }
 
+- (void)addClusterAnnotations:(NSArray *)annotations
+{
+    [_cachedAnnotations addObjectsFromArray:annotations];
+    [self calculateClusterAnnotations];
+}
+
+- (void)calculateClusterAnnotations
+{
+    MKMapView *tempMapView = [[MKMapView alloc] initWithFrame:CGRectZero];
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                
+        [tempMapView addAnnotations:_cachedAnnotations];
+        
+        NSSet *visibleAnnotations = [tempMapView annotationsInMapRect:self.visibleMapRect];
+        
+        NSMutableSet *otherAnnotations = [NSMutableSet setWithArray:_cachedAnnotations];
+        [otherAnnotations minusSet:visibleAnnotations];
+        
+        RWClusterOperation *visibleClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
+                                                                                      annotations:[visibleAnnotations allObjects]
+                                                                                       completion:^(NSArray *clusterAnnotations)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [super removeAnnotations:[super annotations]];
+                [super addAnnotations:clusterAnnotations];                
+            });
+        }];
+        
+        RWClusterOperation *otherClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
+                                                                                    annotations:[otherAnnotations allObjects]
+                                                                                     completion:^(NSArray *clusterAnnotations)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [super addAnnotations:clusterAnnotations];
+            });
+        }];
+        
+        [otherClusterOperation addDependency:visibleClusterOperation];
+        
+        [_clusterOperationQueue cancelAllOperations];
+        [_clusterOperationQueue addOperation:visibleClusterOperation];
+        [_clusterOperationQueue addOperation:otherClusterOperation];
+        
+    });
+}
+
+- (void)removeAnnotation:(id<MKAnnotation>)annotation
+{
+    [super removeAnnotation:annotation];
+    
+    [self removeAnnotationFromCache:annotation];
+}
+
+- (void)removeAnnotations:(NSArray *)annotations
+{
+    [super removeAnnotations:annotations];
+    
+    for (id<MKAnnotation> annotation in annotations) {
+        
+        [self removeAnnotationFromCache:annotation];
+        
+    }
+}
+
+- (void)removeAllAnnotations
+{
+    [_cachedAnnotations removeAllObjects];
+    [self removeAnnotations:self.annotations];
+}
+
+- (void)removeAnnotationFromCache:(id<MKAnnotation>)annotation
+{
+    if ([annotation conformsToProtocol:@protocol(RWClusterAnnotation)]) {
+        
+        NSArray *containedAnnotations = ((id<RWClusterAnnotation>)annotation).containedAnnotations;
+        
+        for (id<MKAnnotation> containedAnnotation in containedAnnotations) {
+            
+            if ([_cachedAnnotations containsObject:containedAnnotation]) {
+                [_cachedAnnotations removeObject:containedAnnotation];
+            }
+            
+        }
+        
+    } else {
+        
+        if ([_cachedAnnotations containsObject:annotation]) {
+            [_cachedAnnotations removeObject:annotation];
+        }
+        
+    }
+}
 #pragma mark - Setting map center
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel
 {
@@ -172,6 +269,11 @@
         if ([_delegate respondsToSelector:@selector(mapViewDidChangeZoomLevel:)]) {
             [_delegate mapViewDidChangeZoomLevel:mapView];
         }
+
+        if (self.useClusters) {
+            [self calculateClusterAnnotations];
+        }
+    
     }
     
     if ([_delegate respondsToSelector:@selector(mapView:regionDidChangeAnimated:)]) {
@@ -311,119 +413,5 @@
     if ([_delegate respondsToSelector:@selector(mapView:didAddOverlayViews:)]) {
         [_delegate mapView:mapView didAddOverlayViews:overlayViews];
     }
-}
-
-#pragma mark - Clustering
-- (float) approxDistanceCoord1:(CLLocationCoordinate2D)coord1 coord2:(CLLocationCoordinate2D)coord2 {
-    
-    CGPoint pt1 = [self convertCoordinate:coord1 toPointToView:self];
-    CGPoint pt2 = [self convertCoordinate:coord2 toPointToView:self];
-    
-    int dx = (int)pt1.x - (int)pt2.x;
-    int dy = (int)pt1.y - (int)pt2.y;
-    
-    dx = abs(dx);
-    dy = abs(dy);
-    
-    if ( dx < dy ) {
-        return dx + dy - (dx >> 1);
-    } else {
-        return dx + dy - (dy >> 1);
-    }
-}
-
-- (BOOL)shouldAvoidClustersAnnotation:(id<MKAnnotation>)annotation {
-    
-    if ([annotation isKindOfClass:[MKUserLocation class]]) {
-        return YES;
-    }
-    
-    return NO;
-}
-
-
-- (NSArray*) findNeighboursForAnnotation:(id<MKAnnotation>)ann inNeighbourdhood:(NSArray*)neighbourhood withDistance:(float)distance
-{
-    NSMutableArray *result = [NSMutableArray array];
-    
-    for (id<MKAnnotation> k in neighbourhood) {
-        
-        if (k == ann) {
-            continue;
-        }
-        
-        if ([self shouldAvoidClustersAnnotation:k]) {
-            continue;
-        }
-        
-        if ([self approxDistanceCoord1:ann.coordinate coord2:k.coordinate] < distance)
-        {
-            [result addObject:k];
-        }
-    }
-    
-    if ([result count] == 0) {
-        return nil;
-    }
-    return result;
-}
-
-
-- (void) clustersForAnnotations:(NSArray*)annotations distance:(float)distance completion:(void (^)(NSArray *data))block {
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-       
-        NSMutableArray *processed = [NSMutableArray array];
-        NSMutableArray *restOfAnnotations = [NSMutableArray arrayWithArray:annotations];
-        NSMutableArray *finalAnns = [NSMutableArray array];
-        
-        for (id<MKAnnotation> ann in [NSArray arrayWithArray:annotations]) {
-            
-            if ([processed containsObject:ann]) {
-                continue;
-            }
-            
-            [processed addObject:ann];
-            
-            if ([self shouldAvoidClustersAnnotation:ann]) {
-                [finalAnns addObject:ann];
-                continue;
-            }
-            
-            NSArray *neighbours = [self findNeighboursForAnnotation:ann inNeighbourdhood:restOfAnnotations withDistance:distance];
-            
-            if (!neighbours) {
-                
-                [finalAnns addObject:ann];
-                
-            } else {
-                
-                [processed addObjectsFromArray:neighbours];
-                
-                id<RWClusterAnnotation> cluster;
-                
-                NSAssert([_delegate respondsToSelector:@selector(mapView:clusterAnnotationForAnnotations:)], @"Delegate should return view for clustering");
-                                    
-                NSMutableArray *containedAnnotations = [NSMutableArray arrayWithArray:neighbours];
-                [containedAnnotations addObject:ann];
-                
-                cluster = [_delegate mapView:self clusterAnnotationForAnnotations:containedAnnotations];
-                
-                [finalAnns addObject:cluster];
-                
-            }
-            
-            [restOfAnnotations removeObjectsInArray:processed];
-                        
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            block(finalAnns);
-
-        });
-        
-    });
-        
 }
 @end
