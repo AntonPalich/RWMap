@@ -140,6 +140,14 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
 {
     NSMutableArray *result = [NSMutableArray array];
     
+    CGPoint leftPoint = CGPointMake(0, 0);
+    CGPoint rightPorint = CGPointMake(distance, 0);
+    
+    CLLocationCoordinate2D leftCoordinate = [_mapView convertPoint:leftPoint toCoordinateFromView:_mapView];
+    CLLocationCoordinate2D rightCoordinate = [_mapView convertPoint:rightPorint toCoordinateFromView:_mapView];
+    
+    double coordinateDistance = rightCoordinate.longitude - leftCoordinate.longitude;
+    
     for (id<MKAnnotation> k in neighbourhood) {
         
         if (k == ann) {
@@ -150,11 +158,17 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
             continue;
         }
         
-        float approxDistance = [self approxDistanceCoord1:ann.coordinate coord2:k.coordinate];
+        double coordinateDelta = ann.coordinate.longitude - k.coordinate.longitude;
         
-        if (approxDistance < distance)
-        {
-            [result addObject:k];
+        if (fabs(coordinateDelta) < coordinateDistance) {
+        
+            float approxDistance = [self approxDistanceCoord1:ann.coordinate coord2:k.coordinate];
+        
+            if (approxDistance < distance)
+            {
+                [result addObject:k];
+            }
+            
         }
     }
     
