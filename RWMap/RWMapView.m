@@ -120,36 +120,39 @@
     MKMapView *tempMapView = [[MKMapView alloc] initWithFrame:CGRectZero];
     [tempMapView addAnnotations:_cachedAnnotations];
 
-    NSSet *visibleAnnotations = [tempMapView annotationsInMapRect:self.visibleMapRect];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
     
-    NSMutableSet *otherAnnotations = [NSMutableSet setWithArray:_cachedAnnotations];
-    [otherAnnotations minusSet:visibleAnnotations];
-    
-    RWClusterOperation *visibleClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
-                                                                                  annotations:[visibleAnnotations allObjects]
-                                                                                   completion:^(NSArray *clusterAnnotations)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [super removeAnnotations:[super annotations]];
-            [super addAnnotations:clusterAnnotations];                
-        });
-    }];
-    
-    RWClusterOperation *otherClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
-                                                                                annotations:[otherAnnotations allObjects]
-                                                                                 completion:^(NSArray *clusterAnnotations)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [super addAnnotations:clusterAnnotations];
-        });
-    }];
-    
-    [otherClusterOperation addDependency:visibleClusterOperation];
-    
-    [_clusterOperationQueue cancelAllOperations];
-    [_clusterOperationQueue addOperation:visibleClusterOperation];
-    [_clusterOperationQueue addOperation:otherClusterOperation];
-    
+        NSSet *visibleAnnotations = [tempMapView annotationsInMapRect:self.visibleMapRect];
+        
+        NSMutableSet *otherAnnotations = [NSMutableSet setWithArray:_cachedAnnotations];
+        [otherAnnotations minusSet:visibleAnnotations];
+        
+        RWClusterOperation *visibleClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
+                                                                                      annotations:[visibleAnnotations allObjects]
+                                                                                       completion:^(NSArray *clusterAnnotations)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [super removeAnnotations:[super annotations]];
+                [super addAnnotations:clusterAnnotations];                
+            });
+        }];
+        
+        RWClusterOperation *otherClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
+                                                                                    annotations:[otherAnnotations allObjects]
+                                                                                     completion:^(NSArray *clusterAnnotations)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [super addAnnotations:clusterAnnotations];
+            });
+        }];
+        
+        [otherClusterOperation addDependency:visibleClusterOperation];
+        
+        [_clusterOperationQueue cancelAllOperations];
+        [_clusterOperationQueue addOperation:visibleClusterOperation];
+        [_clusterOperationQueue addOperation:otherClusterOperation];
+        
+    });
 }
 
 - (void)removeAnnotation:(id<MKAnnotation>)annotation
