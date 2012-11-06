@@ -62,7 +62,6 @@
 		30B2BC791637D32A007708DE /* RWMapView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWMapView.h; sourceTree = "<group>"; };
 		30B2BC7A1637D32A007708DE /* RWMapView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWMapView.m; sourceTree = "<group>"; };
 		30B2BC7C1637F75F007708DE /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		30F61C7C1643BF49008BC245 /* RWClusteringOperation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RWClusteringOperation.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,7 +171,6 @@
 				30B2BC781637D32A007708DE /* RWClusterAnnotation.h */,
 				306F9D011640026A005D8717 /* RWClusterOperation.h */,
 				306F9D021640026A005D8717 /* RWClusterOperation.m */,
-				30F61C7C1643BF49008BC245 /* RWClusteringOperation.h */,
 				30B2BC791637D32A007708DE /* RWMapView.h */,
 				30B2BC7A1637D32A007708DE /* RWMapView.m */,
 			);
