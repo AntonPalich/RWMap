@@ -105,7 +105,7 @@
 
 - (void)removeAnnotations:(id)sender
 {
-    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self.mapView removeAllAnnotations];
 }
 
 #pragma mark - Helpers
