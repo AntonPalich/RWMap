@@ -59,6 +59,14 @@
     
     _cachedAnnotations = [NSMutableArray new];
     _clusterOperationQueue = [[NSOperationQueue alloc] init];
+    _storageMapView = [[MKMapView alloc] initWithFrame:CGRectZero];
+}
+
+- (void)dealloc
+{
+    _cachedAnnotations = nil;
+    _clusterOperationQueue = nil;
+    _storageMapView = nil;
 }
 
 #pragma mark - Properties
@@ -112,48 +120,41 @@
 - (void)addClusterAnnotations:(NSArray *)annotations
 {
     [_cachedAnnotations addObjectsFromArray:annotations];
+    
+    [self resetClusterAnnotations];
     [self calculateClusterAnnotations];
+}
+
+- (void)resetClusterAnnotations
+{
+    [super removeAnnotations:[super annotations]];
+    [_storageMapView removeAnnotations:_storageMapView.annotations];
+    [_storageMapView addAnnotations:_cachedAnnotations];
 }
 
 - (void)calculateClusterAnnotations
 {
-    MKMapView *tempMapView = [[MKMapView alloc] initWithFrame:CGRectZero];
-    [tempMapView addAnnotations:_cachedAnnotations];
-    
-    NSSet *visibleAnnotations = [tempMapView annotationsInMapRect:self.visibleMapRect];
-    
-    NSMutableSet *otherAnnotations = [NSMutableSet setWithArray:_cachedAnnotations];
-    [otherAnnotations minusSet:visibleAnnotations];
+    NSSet *visibleAnnotations = [_storageMapView annotationsInMapRect:self.visibleMapRect];
+    [_storageMapView removeAnnotations:[visibleAnnotations allObjects]];
     
     RWClusterOperation *visibleClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
                                                                                   annotations:[visibleAnnotations allObjects]
                                                                                    completion:^(NSArray *clusterAnnotations)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [super removeAnnotations:[super annotations]];
             [super addAnnotations:clusterAnnotations];                
         });
     }];
     
-    RWClusterOperation *otherClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
-                                                                                annotations:[otherAnnotations allObjects]
-                                                                                 completion:^(NSArray *clusterAnnotations)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [super addAnnotations:clusterAnnotations];
-        });
-    }];
-    
-    [otherClusterOperation addDependency:visibleClusterOperation];
-    
     [_clusterOperationQueue cancelAllOperations];
     [_clusterOperationQueue addOperation:visibleClusterOperation];
-    [_clusterOperationQueue addOperation:otherClusterOperation];
     
 }
 
 - (void)removeAnnotation:(id<MKAnnotation>)annotation
 {
+    [_clusterOperationQueue cancelAllOperations];
+    
     [super removeAnnotation:annotation];
     
     [self removeAnnotationFromCache:annotation];
@@ -161,6 +162,8 @@
 
 - (void)removeAnnotations:(NSArray *)annotations
 {
+    [_clusterOperationQueue cancelAllOperations];
+
     [super removeAnnotations:annotations];
     
     for (id<MKAnnotation> annotation in annotations) {
@@ -172,7 +175,11 @@
 
 - (void)removeAllAnnotations
 {
+    [_clusterOperationQueue cancelAllOperations];
+    
     [_cachedAnnotations removeAllObjects];
+    [self resetClusterAnnotations];
+    
     [self removeAnnotations:self.annotations];
 }
 
@@ -186,6 +193,7 @@
             
             if ([_cachedAnnotations containsObject:containedAnnotation]) {
                 [_cachedAnnotations removeObject:containedAnnotation];
+                [_storageMapView removeAnnotation:containedAnnotation];
             }
             
         }
@@ -194,6 +202,7 @@
         
         if ([_cachedAnnotations containsObject:annotation]) {
             [_cachedAnnotations removeObject:annotation];
+            [_storageMapView removeAnnotation:annotation];
         }
         
     }
@@ -265,11 +274,16 @@
         if ([_delegate respondsToSelector:@selector(mapViewDidChangeZoomLevel:)]) {
             [_delegate mapViewDidChangeZoomLevel:mapView];
         }
-
+        
         if (self.useClusters) {
-            [self calculateClusterAnnotations];
+            [self resetClusterAnnotations];
+//            [self calculateClusterAnnotations];
         }
+        
+    }
     
+    if (self.useClusters) {
+        [self calculateClusterAnnotations];
     }
     
     if ([_delegate respondsToSelector:@selector(mapView:regionDidChangeAnimated:)]) {
