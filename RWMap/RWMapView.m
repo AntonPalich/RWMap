@@ -11,13 +11,20 @@
 
 @interface RWMapView() {
     
+    // Current zoom level of the map
     NSInteger _currentZoomLevel;
     
+    // Delegate
     id<RWMapViewDelegate> _delegate;
     
+    // Annotations added to the map
     NSMutableArray *_cachedAnnotations;
     
+    // Operation queue for clustering
     NSOperationQueue *_clusterOperationQueue;
+    
+    // Map view for handling annotations used in clustering
+    MKMapView *_storageMapView;
 }
 
 @end
