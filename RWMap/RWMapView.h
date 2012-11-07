@@ -30,6 +30,7 @@
 
 @property (nonatomic, readonly) NSInteger zoomLevel;
 - (NSInteger)zoomLevelForMapRect:(MKMapRect)mapRect;
+- (MKMapRect)mapRectForZoomLevel:(NSInteger)zoomLevel;
 
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel;
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomLevel:(NSInteger)zoomLevel animated:(BOOL)animated;

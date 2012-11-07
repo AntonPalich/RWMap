@@ -140,8 +140,11 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
 {
     NSMutableArray *result = [NSMutableArray array];
     
+    double zoomFactor = _mapView.visibleMapRect.size.width / [_mapView mapRectForZoomLevel:_mapView.zoomLevel].size.width;
+    double distanceFactor = distance / zoomFactor;
+    
     CGPoint leftPoint = CGPointMake(0, 0);
-    CGPoint rightPorint = CGPointMake(distance, 0);
+    CGPoint rightPorint = CGPointMake(distanceFactor, 0);
     
     CLLocationCoordinate2D leftCoordinate = [_mapView convertPoint:leftPoint toCoordinateFromView:_mapView];
     CLLocationCoordinate2D rightCoordinate = [_mapView convertPoint:rightPorint toCoordinateFromView:_mapView];
@@ -164,7 +167,7 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
         
             float approxDistance = [self approxDistanceCoord1:ann.coordinate coord2:k.coordinate];
         
-            if (approxDistance < distance)
+            if (approxDistance < distanceFactor)
             {
                 [result addObject:k];
             }

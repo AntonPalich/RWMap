@@ -273,6 +273,20 @@
     return zoomLevel;
 }
 
+- (MKMapRect)mapRectForZoomLevel:(NSInteger)zoomLevel
+{
+    double width = MKMapRectWorld.size.width / pow(2, zoomLevel);
+    double height = MKMapRectWorld.size.height / pow(2, zoomLevel);
+    
+    MKMapPoint centerPoint = MKMapPointForCoordinate(self.centerCoordinate);
+    
+    MKMapRect mapRect = MKMapRectMake(centerPoint.x - width / 2,
+                                      centerPoint.y - height / 2,
+                                      width,
+                                      height);
+    return mapRect;
+}
+
 #pragma mark - Setting map center
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel
 {
