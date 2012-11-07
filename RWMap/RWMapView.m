@@ -6,7 +6,6 @@
 //
 
 #import "RWMapView.h"
-
 #import "RWClusterOperation.h"
 
 @interface RWMapView() {
@@ -17,8 +16,8 @@
     // Delegate
     id<RWMapViewDelegate> _delegate;
     
-    // Annotations added to the map
-    NSMutableArray *_cachedAnnotations;
+    // Annotations added to the map and used for clustering
+    NSMutableArray *_annotationsForClustering;
     
     // Operation queue for clustering
     NSOperationQueue *_clusterOperationQueue;
@@ -28,6 +27,9 @@
 }
 
 @end
+
+#define kDefaultZoomLevel 0
+#define kDefaultRadius 100
 
 @implementation RWMapView
 
@@ -57,21 +59,20 @@
 {
     [super setDelegate:self];
     
-    _currentZoomLevel = 0;
+    _currentZoomLevel = kDefaultZoomLevel;
+    _clusterRadius = kDefaultRadius;
     
-    self.useClusters = NO;
-    self.useCustomCalloutView = NO;
+    _useClusters = NO;
+    _useCustomCalloutView = NO;
     
-    self.clusterRadius = 100;
-    
-    _cachedAnnotations = [NSMutableArray new];
+    _annotationsForClustering = [NSMutableArray new];
     _clusterOperationQueue = [[NSOperationQueue alloc] init];
     _storageMapView = [[MKMapView alloc] initWithFrame:CGRectZero];
 }
 
 - (void)dealloc
 {
-    _cachedAnnotations = nil;
+    _annotationsForClustering = nil;
     _clusterOperationQueue = nil;
     _storageMapView = nil;
 }
@@ -93,104 +94,65 @@
 }
 
 #pragma mark - Class methods
-- (NSInteger)zoomLevelForMapRect:(MKMapRect)mapRect
+- (void)addAnnotation:(id<MKAnnotation>)annotation
 {
-    CGFloat maxSize = MAX(mapRect.size.width, mapRect.size.height);
-    
-    CGFloat worldSize;
-    
-    if (maxSize == mapRect.size.width) {
-        worldSize = MKMapRectWorld.size.width;
+    if (_useClusters) {
+        
+        [self addAnnotationForClustering:annotation];
+        
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
+        
     } else {
-        worldSize = MKMapRectWorld.size.height;
+        
+        [super addAnnotation:annotation];
+        
     }
-    
-    double zoomLevel = worldSize / maxSize;
-    zoomLevel = floor(log2(zoomLevel));
-    
-    return zoomLevel;
 }
 
-- (void)addAnnotations:(NSArray *)annotations {
-    
-    if (self.useClusters) {
+- (void)addAnnotationForClustering:(id<MKAnnotation>)annotation
+{
+    [_annotationsForClustering addObject:annotation];
+}
+
+- (void)addAnnotations:(NSArray *)annotations
+{
+    if (_useClusters) {
         
-        [self addClusterAnnotations:annotations];
+        [self addAnnotationsForClustering:annotations];
+        
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
         
     } else {
-    
+        
         [super addAnnotations:annotations];
         
     }
 }
 
-- (void)addClusterAnnotations:(NSArray *)annotations
+- (void)addAnnotationsForClustering:(NSArray *)annotations
 {
-    [_cachedAnnotations addObjectsFromArray:annotations];
-    
-    [self resetClusterAnnotations];
-    [self calculateClusterAnnotations];
-}
-
-- (void)resetClusterAnnotations
-{
-    [super removeAnnotations:[super annotations]];
-    [_storageMapView removeAnnotations:_storageMapView.annotations];
-    [_storageMapView addAnnotations:_cachedAnnotations];
-}
-
-- (void)calculateClusterAnnotations
-{
-    NSSet *visibleAnnotations = [_storageMapView annotationsInMapRect:self.visibleMapRect];
-    [_storageMapView removeAnnotations:[visibleAnnotations allObjects]];
-    
-    RWClusterOperation *visibleClusterOperation = [[RWClusterOperation alloc] initWithMapView:self
-                                                                                  annotations:[visibleAnnotations allObjects]
-                                                                                   completion:^(NSArray *clusterAnnotations)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [super addAnnotations:clusterAnnotations];                
-        });
-    }];
-    
-    [_clusterOperationQueue cancelAllOperations];
-    [_clusterOperationQueue addOperation:visibleClusterOperation];
-    
+    [_annotationsForClustering addObjectsFromArray:annotations];
 }
 
 - (void)removeAnnotation:(id<MKAnnotation>)annotation
 {
-    [_clusterOperationQueue cancelAllOperations];
-    
-    [super removeAnnotation:annotation];
-    
-    [self removeAnnotationFromCache:annotation];
-}
-
-- (void)removeAnnotations:(NSArray *)annotations
-{
-    [_clusterOperationQueue cancelAllOperations];
-
-    [super removeAnnotations:annotations];
-    
-    for (id<MKAnnotation> annotation in annotations) {
+    if (_useClusters) {
         
-        [self removeAnnotationFromCache:annotation];
+        [self removeAnnotationForClustering:annotation];
+        
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
+        
+    } else {
+        
+        [super removeAnnotation:annotation];
         
     }
 }
 
-- (void)removeAllAnnotations
-{
-    [_clusterOperationQueue cancelAllOperations];
-    
-    [_cachedAnnotations removeAllObjects];
-    [self resetClusterAnnotations];
-    
-    [self removeAnnotations:self.annotations];
-}
-
-- (void)removeAnnotationFromCache:(id<MKAnnotation>)annotation
+- (void)removeAnnotationForClustering:(id<MKAnnotation>)annotation
 {
     if ([annotation conformsToProtocol:@protocol(RWClusterAnnotation)]) {
         
@@ -198,22 +160,119 @@
         
         for (id<MKAnnotation> containedAnnotation in containedAnnotations) {
             
-            if ([_cachedAnnotations containsObject:containedAnnotation]) {
-                [_cachedAnnotations removeObject:containedAnnotation];
-                [_storageMapView removeAnnotation:containedAnnotation];
+            if ([_annotationsForClustering containsObject:containedAnnotation]) {
+                [_annotationsForClustering removeObject:containedAnnotation];
             }
             
         }
         
     } else {
         
-        if ([_cachedAnnotations containsObject:annotation]) {
-            [_cachedAnnotations removeObject:annotation];
-            [_storageMapView removeAnnotation:annotation];
+        if ([_annotationsForClustering containsObject:annotation]) {
+            [_annotationsForClustering removeObject:annotation];
         }
         
     }
 }
+
+- (void)removeAnnotations:(NSArray *)annotations
+{
+    if (_useClusters) {
+        
+        [self removeAnnotationsForClustering:annotations];
+        
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
+        
+    } else {
+        
+        [super removeAnnotations:annotations];
+        
+    }
+}
+
+- (void)removeAnnotationsForClustering:(NSArray *)annotations
+{
+    for (id<MKAnnotation> annotation in annotations) {
+        [self removeAnnotationForClustering:annotation];
+    }
+}
+
+- (void)removeAllAnnotations
+{
+    if (_useClusters) {
+        
+        [self removeAllAnnotationsForClustering];
+        
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
+        
+    } else {
+        
+        [self removeAnnotations:self.annotations];
+        
+    }
+}
+
+- (void)removeAllAnnotationsForClustering
+{
+    [_annotationsForClustering removeAllObjects];
+}
+
+- (void)resetClusterAnnotations
+{
+    // Удаляем все аннотации с карты
+    [super removeAnnotations:[super annotations]];
+    
+    // Обновляем состояние карты, содержащей аннотации для кластеризации
+    [_storageMapView removeAnnotations:_storageMapView.annotations];
+    [_storageMapView addAnnotations:_annotationsForClustering];
+}
+
+- (void)calculateClusterAnnotations
+{
+    MKMapRect visibleMapRect = self.visibleMapRect;
+    visibleMapRect = MKMapRectMake(visibleMapRect.origin.x - visibleMapRect.size.width / 2,
+                                   visibleMapRect.origin.y - visibleMapRect.size.height / 2,
+                                   visibleMapRect.size.width * 2,
+                                   visibleMapRect.size.height * 2);
+    
+    // Берем только аннотации, находящиеся в прямоугольнике и удаляем их с карты, содержащей аннотаии для кластеризации
+    NSSet *visibleAnnotations = [_storageMapView annotationsInMapRect:visibleMapRect];
+    [_storageMapView removeAnnotations:[visibleAnnotations allObjects]];
+    
+    RWClusterOperation *clusterOperation = [[RWClusterOperation alloc] initWithMapView:self
+                                                                           annotations:[visibleAnnotations allObjects]
+                                                                            completion:^(NSArray *clusterAnnotations)
+                                            {
+                                                dispatch_async(dispatch_get_main_queue(), ^{
+                                                    [super addAnnotations:clusterAnnotations];
+                                                });
+                                            }];
+    
+    [_clusterOperationQueue cancelAllOperations];
+    [_clusterOperationQueue addOperation:clusterOperation];
+    
+}
+
+- (NSInteger)zoomLevelForMapRect:(MKMapRect)mapRect
+{
+    CGFloat maxSide = MAX(mapRect.size.width, mapRect.size.height);
+    
+    CGFloat worldSide;
+    
+    if (maxSide == mapRect.size.width) {
+        worldSide = MKMapRectWorld.size.width;
+    } else {
+        worldSide = MKMapRectWorld.size.height;
+    }
+    
+    double zoomLevel = worldSide / maxSide;
+    zoomLevel = floor(log2(zoomLevel));
+    
+    return zoomLevel;
+}
+
 #pragma mark - Setting map center
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel
 {
@@ -222,7 +281,7 @@
 
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomLevel:(NSInteger)zoomLevel animated:(BOOL)animated
 {
-
+    
     // FIX: difference behavior for difference orientations and interface idioms
     int interfaceOrientationFactor;
     
@@ -255,7 +314,7 @@
                                    newVisibleRect.size.height);
     
     [self setVisibleMapRect:newVisibleRect animated:animated];
-
+    
 }
 
 #pragma mark - Responding to Map Position Changes
@@ -284,7 +343,7 @@
         
         if (self.useClusters) {
             [self resetClusterAnnotations];
-//            [self calculateClusterAnnotations];
+            //            [self calculateClusterAnnotations];
         }
         
     }
