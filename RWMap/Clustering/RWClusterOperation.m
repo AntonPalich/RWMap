@@ -7,6 +7,7 @@
 //
 
 #import "RWClusterOperation.h"
+#import "RWCalloutAnnotation.h"
 
 typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
 
@@ -137,6 +138,8 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
 - (BOOL)shouldAvoidClustersAnnotation:(id<MKAnnotation>)annotation {
     
     if ([annotation isKindOfClass:[MKUserLocation class]]) {
+        return YES;
+    } else if ([annotation conformsToProtocol:@protocol(RWCalloutAnnotation)]) {
         return YES;
     }
     
