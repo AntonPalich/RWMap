@@ -35,10 +35,10 @@
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(NSInteger)zoomLevel;
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate zoomLevel:(NSInteger)zoomLevel animated:(BOOL)animated;
 
-@property (nonatomic, assign) BOOL useCustomCalloutView;
-
-@property (nonatomic, assign) BOOL useClusters;
 @property (nonatomic, assign) float clusterRadius;
+
+- (void)addAnnotation:(id<MKAnnotation>)annotation cluster:(BOOL)cluster;
+- (void)addAnnotations:(NSArray *)annotations cluster:(BOOL)cluster;
 
 - (void)removeAllAnnotations;
 

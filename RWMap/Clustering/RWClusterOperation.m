@@ -45,11 +45,6 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
     NSMutableArray *restOfAnnotations = [NSMutableArray arrayWithArray:_annotations];
     NSMutableArray *finalAnns = [NSMutableArray array];
     
-    NSDate *date = [NSDate date];
-    
-    int forCounter = 0;
-    int elseCounter = 0;
-    
     for (id<MKAnnotation> ann in _annotations) {
         
         if (self.isCancelled) {
@@ -58,9 +53,7 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
             _mapView = nil;
             return;
         }
-        
-        forCounter++;
-        
+                
         if ([processed containsObject:ann]) {
             continue;
         }
@@ -78,9 +71,7 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
             [finalAnns addObject:ann];
             
         } else {
-            
-            elseCounter++;
-            
+                        
             [processed addObjectsFromArray:neighbours];
             
             NSAssert([_mapView.delegate respondsToSelector:@selector(mapView:clusterAnnotationForAnnotations:)], @"Delegate should return view for clustering");
@@ -97,19 +88,14 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
         [restOfAnnotations removeObjectsInArray:processed];
         
     }
-    
-    NSTimeInterval sinceDate = [date timeIntervalSinceNow] * - 1000.0f;
-    NSLog(@"Cluster annotations calculated in %f with %d cycles, %d cluster creations", sinceDate, forCounter, elseCounter);
-    
+
     _completionBlock(finalAnns);
     
 }
 
 #pragma mark - Clustering
-- (float) approxDistanceCoord1:(CLLocationCoordinate2D)coord1 coord2:(CLLocationCoordinate2D)coord2 {
-    
-    // TODO кэшировать посчитанные расстояния
-    
+- (float) approxDistanceCoord1:(CLLocationCoordinate2D)coord1 coord2:(CLLocationCoordinate2D)coord2
+{
     CGPoint pt1 = [_mapView convertCoordinate:coord1 toPointToView:_mapView];
     CGPoint pt2 = [_mapView convertCoordinate:coord2 toPointToView:_mapView];
     
