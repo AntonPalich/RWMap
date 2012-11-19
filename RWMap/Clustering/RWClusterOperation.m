@@ -44,6 +44,22 @@ typedef void (^CompletionBlock)(NSArray *clusterAnnotations);
     NSMutableArray *processed = [NSMutableArray array];
     NSMutableArray *restOfAnnotations = [NSMutableArray arrayWithArray:_annotations];
     NSMutableArray *finalAnns = [NSMutableArray array];
+        
+    [restOfAnnotations sortWithOptions:NSSortConcurrent usingComparator:^NSComparisonResult(id obj1, id obj2) {
+        
+        id<MKAnnotation> annotationOne = (id <MKAnnotation>)obj1;
+        id<MKAnnotation> annotationTwo = (id <MKAnnotation>)obj2;
+
+        if (annotationOne.coordinate.latitude < annotationTwo.coordinate.latitude) {
+            return NSOrderedAscending;
+        } else {
+            return NSOrderedDescending;
+        }
+        
+    }];
+        
+    int forCounter = 0;
+    int elseCounter = 0;
     
     for (id<MKAnnotation> ann in _annotations) {
         
