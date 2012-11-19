@@ -9,20 +9,12 @@
 #import "RWClusterOperation.h"
 
 @interface RWMapView() {
-    
-    // Current zoom level of the map
     NSInteger _currentZoomLevel;
-    
-    // Delegate
     id<RWMapViewDelegate> _delegate;
-    
-    // Annotations added to the map and used for clustering
+    NSMutableArray *_annotations;
+    NSMutableArray *_annotationsClustered;
     NSMutableArray *_annotationsForClustering;
-    
-    // Operation queue for clustering
     NSOperationQueue *_clusterOperationQueue;
-    
-    // Map view for handling annotations used in clustering
     MKMapView *_storageMapView;
 }
 
@@ -62,16 +54,17 @@
     _currentZoomLevel = kDefaultZoomLevel;
     _clusterRadius = kDefaultRadius;
     
-    _useClusters = NO;
-    _useCustomCalloutView = NO;
-    
+    _annotations = [NSMutableArray new];
+    _annotationsClustered = [NSMutableArray new];
     _annotationsForClustering = [NSMutableArray new];
-    _clusterOperationQueue = [[NSOperationQueue alloc] init];
+    _clusterOperationQueue = [NSOperationQueue new];
     _storageMapView = [[MKMapView alloc] initWithFrame:CGRectZero];
 }
 
 - (void)dealloc
 {
+    _annotations = nil;
+    _annotationsClustered = nil;
     _annotationsForClustering = nil;
     _clusterOperationQueue = nil;
     _storageMapView = nil;
@@ -94,41 +87,56 @@
 }
 
 #pragma mark - Class methods
-- (void)addAnnotation:(id<MKAnnotation>)annotation
+- (NSArray *)annotations
 {
-    if (_useClusters) {
+    NSMutableArray *annotations = [NSMutableArray new];
+    [annotations addObjectsFromArray:_annotations];
+    [annotations addObjectsFromArray:_annotationsForClustering];
+    return [NSArray arrayWithArray:annotations];
+}
+
+- (void)addAnnotation:(id<MKAnnotation>)annotation cluster:(BOOL)cluster
+{
+    if (cluster) {
         
-        [self addAnnotationForClustering:annotation];
+        [_annotationsForClustering addObject:annotation];
         
         [self resetClusterAnnotations];
         [self calculateClusterAnnotations];
         
     } else {
         
+        [_annotations addObject:annotation];
         [super addAnnotation:annotation];
         
     }
 }
 
-- (void)addAnnotationForClustering:(id<MKAnnotation>)annotation
+- (void)addAnnotation:(id<MKAnnotation>)annotation
 {
-    [_annotationsForClustering addObject:annotation];
+    [self addAnnotation:annotation cluster:NO];
 }
 
-- (void)addAnnotations:(NSArray *)annotations
+- (void)addAnnotations:(NSArray *)annotations cluster:(BOOL)cluster
 {
-    if (_useClusters) {
+    if (cluster) {
         
-        [self addAnnotationsForClustering:annotations];
+        [_annotationsForClustering addObjectsFromArray:annotations];
         
         [self resetClusterAnnotations];
         [self calculateClusterAnnotations];
         
     } else {
         
+        [_annotations addObjectsFromArray:annotations];
         [super addAnnotations:annotations];
         
     }
+}
+
+- (void)addAnnotations:(NSArray *)annotations
+{
+    [self addAnnotations:annotations cluster:NO];
 }
 
 - (void)addAnnotationsForClustering:(NSArray *)annotations
@@ -138,95 +146,73 @@
 
 - (void)removeAnnotation:(id<MKAnnotation>)annotation
 {
-    if (_useClusters) {
-        
-        [self removeAnnotationForClustering:annotation];
-        
-        [self resetClusterAnnotations];
-        [self calculateClusterAnnotations];
-        
-    } else {
-        
-        [super removeAnnotation:annotation];
-        
-    }
+    [self removeAnnotationFromCache:annotation];
+    
+    [self resetClusterAnnotations];
+    [self calculateClusterAnnotations];
 }
 
-- (void)removeAnnotationForClustering:(id<MKAnnotation>)annotation
+- (void)removeAnnotationFromCache:(id<MKAnnotation>)annotation
 {
-    if ([annotation conformsToProtocol:@protocol(RWClusterAnnotation)]) {
+    if ([_annotationsClustered containsObject:annotation]){
         
-        NSArray *containedAnnotations = ((id<RWClusterAnnotation>)annotation).containedAnnotations;
+        [_annotationsClustered removeObject:annotation];
         
-        for (id<MKAnnotation> containedAnnotation in containedAnnotations) {
+        if ([annotation conformsToProtocol:@protocol(RWClusterAnnotation)]) {
             
-            if ([_annotationsForClustering containsObject:containedAnnotation]) {
-                [_annotationsForClustering removeObject:containedAnnotation];
+            NSArray *containedAnnotations = ((id<RWClusterAnnotation>)annotation).containedAnnotations;
+            
+            for (id<MKAnnotation> containedAnnotation in containedAnnotations) {
+                
+                if ([_annotationsForClustering containsObject:containedAnnotation]) {
+                    [_annotationsForClustering removeObject:containedAnnotation];
+                }
+                
             }
             
-        }
-        
-    } else {
-        
-        if ([_annotationsForClustering containsObject:annotation]) {
+        } else {
+            
             [_annotationsForClustering removeObject:annotation];
+            
         }
+
+    } else if ([_annotationsForClustering containsObject:annotation]) {
+    
+        [_annotationsForClustering removeObject:annotation];
+    
+    } else if ([_annotations containsObject:annotation]) {
+        
+        [_annotations removeObject:annotation];
         
     }
+
+    [super removeAnnotation:annotation];
 }
 
 - (void)removeAnnotations:(NSArray *)annotations
 {
-    if (_useClusters) {
-        
-        [self removeAnnotationsForClustering:annotations];
-        
-        [self resetClusterAnnotations];
-        [self calculateClusterAnnotations];
-        
-    } else {
-        
-        [super removeAnnotations:annotations];
-        
-    }
-}
-
-- (void)removeAnnotationsForClustering:(NSArray *)annotations
-{
     for (id<MKAnnotation> annotation in annotations) {
-        [self removeAnnotationForClustering:annotation];
+        [self removeAnnotationFromCache:annotation];
     }
+    
+    [self resetClusterAnnotations];
+    [self calculateClusterAnnotations];
 }
 
 - (void)removeAllAnnotations
 {
-    if (_useClusters) {
-        
-        [self removeAllAnnotationsForClustering];
-        
-        [self resetClusterAnnotations];
-        [self calculateClusterAnnotations];
-        
-    } else {
-        
-        [self removeAnnotations:self.annotations];
-        
-    }
-}
-
-- (void)removeAllAnnotationsForClustering
-{
-    [_annotationsForClustering removeAllObjects];
+    [self removeAnnotations:self.annotations];
 }
 
 - (void)resetClusterAnnotations
 {
-    // Удаляем все аннотации с карты
-    [super removeAnnotations:[super annotations]];
+    [_clusterOperationQueue cancelAllOperations];
+
+    [super removeAnnotations:_annotationsClustered];
+    [_annotationsClustered removeAllObjects];
     
-    // Обновляем состояние карты, содержащей аннотации для кластеризации
     [_storageMapView removeAnnotations:_storageMapView.annotations];
-    [_storageMapView addAnnotations:_annotationsForClustering];
+    [_storageMapView addAnnotations:_annotationsForClustering];    
 }
 
 - (void)calculateClusterAnnotations
@@ -237,7 +223,6 @@
                                    visibleMapRect.size.width * 2,
                                    visibleMapRect.size.height * 2);
     
-    // Берем только аннотации, находящиеся в прямоугольнике и удаляем их с карты, содержащей аннотаии для кластеризации
     NSSet *visibleAnnotations = [_storageMapView annotationsInMapRect:visibleMapRect];
     [_storageMapView removeAnnotations:[visibleAnnotations allObjects]];
     
@@ -246,11 +231,11 @@
                                                                             completion:^(NSArray *clusterAnnotations)
                                             {
                                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                                    [_annotationsClustered addObjectsFromArray:clusterAnnotations];
                                                     [super addAnnotations:clusterAnnotations];
                                                 });
                                             }];
     
-    [_clusterOperationQueue cancelAllOperations];
     [_clusterOperationQueue addOperation:clusterOperation];
     
 }
@@ -355,14 +340,13 @@
             [_delegate mapViewDidChangeZoomLevel:mapView];
         }
         
-        if (self.useClusters) {
+        if (_annotationsForClustering.count != 0) {
             [self resetClusterAnnotations];
-            //            [self calculateClusterAnnotations];
         }
         
     }
     
-    if (self.useClusters) {
+    if (_annotationsForClustering.count != 0) {
         [self calculateClusterAnnotations];
     }
     

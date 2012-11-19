@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol RWCalloutAnnotation <NSObject>
+@protocol RWCalloutAnnotation <MKAnnotation>
 
 @property (nonatomic, weak) MKAnnotationView *parentAnnotationView;
 @property (nonatomic, weak) MKMapView *mapView;

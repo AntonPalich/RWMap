@@ -24,7 +24,6 @@
     [super viewDidLoad];
     
     _mapView.delegate = self;
-    _mapView.useClusters = YES;
     _mapView.clusterRadius = 100;
     
     _propertiesView.layer.cornerRadius = 7.0f;
@@ -95,7 +94,7 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            [self.mapView addAnnotations:annotations];
+            [self.mapView addAnnotations:annotations cluster:YES];
             
         });
         
