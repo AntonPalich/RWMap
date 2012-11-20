@@ -21,6 +21,7 @@
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForCalloutAnnotation:(id<RWCalloutAnnotation>)annotation;
 
 - (id<RWClusterAnnotation>)mapView:(MKMapView *)mapView clusterAnnotationForAnnotations:(NSArray *)annotations;
+- (id<RWCalloutAnnotation>)mapView:(MKMapView *)mapView calloutAnnotationForAnnotationView:(MKAnnotationView *)view;
 
 @end
 

@@ -12,4 +12,6 @@
 @property (nonatomic, weak) MKAnnotationView *parentAnnotationView;
 @property (nonatomic, weak) MKMapView *mapView;
 
+- (id)initWithMapView:(MKMapView *)mapView parentView:(MKAnnotationView *)parentView;
+
 @end

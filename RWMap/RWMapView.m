@@ -7,10 +7,13 @@
 
 #import "RWMapView.h"
 #import "RWClusterOperation.h"
+#import "RWAnnotationView.h"
+
 
 @interface RWMapView() {
     NSInteger _currentZoomLevel;
     id<RWMapViewDelegate> _delegate;
+    id<RWCalloutAnnotation> _calloutAnnotation;
     NSMutableArray *_annotations;
     NSMutableArray *_annotationsClustered;
     NSMutableArray *_annotationsForClustering;
@@ -146,14 +149,16 @@
 
 - (void)removeAnnotation:(id<MKAnnotation>)annotation
 {
-    [self removeAnnotationFromCache:annotation];
-    
-    [self resetClusterAnnotations];
-    [self calculateClusterAnnotations];
+    if ([self removeAnnotationFromCache:annotation]) {
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
+    }
 }
 
-- (void)removeAnnotationFromCache:(id<MKAnnotation>)annotation
+- (BOOL)removeAnnotationFromCache:(id<MKAnnotation>)annotation
 {
+    BOOL needToReload = NO;
+    
     if ([_annotationsClustered containsObject:annotation]){
         
         [_annotationsClustered removeObject:annotation];
@@ -175,6 +180,8 @@
             [_annotationsForClustering removeObject:annotation];
             
         }
+        
+        needToReload = YES;
 
     } else if ([_annotationsForClustering containsObject:annotation]) {
     
@@ -187,16 +194,26 @@
     }
 
     [super removeAnnotation:annotation];
+    
+    return needToReload;
 }
 
 - (void)removeAnnotations:(NSArray *)annotations
 {
+    BOOL needToReload = NO;
+    
     for (id<MKAnnotation> annotation in annotations) {
-        [self removeAnnotationFromCache:annotation];
+        
+        if ([self removeAnnotationFromCache:annotation] ){
+            needToReload = YES;
+        }
+        
     }
     
-    [self resetClusterAnnotations];
-    [self calculateClusterAnnotations];
+    if (needToReload){
+        [self resetClusterAnnotations];
+        [self calculateClusterAnnotations];
+    }
 }
 
 - (void)removeAllAnnotations
@@ -460,6 +477,25 @@
 #pragma mark - Selecting Annotation Views
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
 {
+    if ([view conformsToProtocol:@protocol(RWAnnotationView)]) {
+        
+        if ([view respondsToSelector:@selector(shouldShowCalloutView)]) {
+        
+            if ([(id<RWAnnotationView>)view shouldShowCalloutView]) {
+                                
+                if ([_delegate respondsToSelector:@selector(mapView:calloutAnnotationForAnnotationView:)]) {
+                
+                    _calloutAnnotation = [_delegate mapView:mapView calloutAnnotationForAnnotationView:view];
+                    [self addAnnotation:_calloutAnnotation];
+                    
+                }
+                
+            }
+            
+        }
+        
+    }
+    
     if ([_delegate respondsToSelector:@selector(mapView:didSelectAnnotationView:)]) {
         [_delegate mapView:mapView didSelectAnnotationView:view];
     }
@@ -467,6 +503,10 @@
 
 - (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view
 {
+    if (view == _calloutAnnotation.parentAnnotationView) {
+        [self removeAnnotation:_calloutAnnotation];
+    }
+    
     if ([_delegate respondsToSelector:@selector(mapView:didDeselectAnnotationView:)]) {
         [_delegate mapView:mapView didDeselectAnnotationView:view];
     }
