@@ -9,7 +9,10 @@
 
 @protocol RWAnnotationView <NSObject>
 
+@optional
+
 - (void)mapViewDidSelectAnnotationView:(MKMapView *)mapView;
 - (void)mapViewDidDeselectAnnotationView:(MKMapView *)mapView;
+- (BOOL)shouldShowCalloutView;
 
 @end
