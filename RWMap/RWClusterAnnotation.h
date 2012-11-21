@@ -10,5 +10,6 @@
 @protocol RWClusterAnnotation <MKAnnotation>
 
 @property (nonatomic, strong) NSArray *containedAnnotations;
+- (id)initWithContainedAnnotations:(NSArray *)containedAnnotations;
 
 @end
