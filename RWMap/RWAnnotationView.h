@@ -13,6 +13,6 @@
 
 - (void)mapViewDidSelectAnnotationView:(MKMapView *)mapView;
 - (void)mapViewDidDeselectAnnotationView:(MKMapView *)mapView;
-- (BOOL)shouldShowCalloutView;
+- (BOOL)shouldShowCalloutView:(MKMapView *)mapView;
 
 @end
