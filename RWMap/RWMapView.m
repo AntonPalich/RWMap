@@ -481,7 +481,7 @@
         
         if ([view respondsToSelector:@selector(shouldShowCalloutView)]) {
         
-            if ([(id<RWAnnotationView>)view shouldShowCalloutView]) {
+            if ([(id<RWAnnotationView>)view shouldShowCalloutView:self]) {
                                 
                 if ([_delegate respondsToSelector:@selector(mapView:calloutAnnotationForAnnotationView:)]) {
                 
