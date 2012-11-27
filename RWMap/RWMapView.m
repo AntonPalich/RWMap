@@ -479,7 +479,7 @@
 {
     if ([view conformsToProtocol:@protocol(RWAnnotationView)]) {
         
-        if ([view respondsToSelector:@selector(shouldShowCalloutView)]) {
+        if ([view respondsToSelector:@selector(shouldShowCalloutView:)]) {
         
             if ([(id<RWAnnotationView>)view shouldShowCalloutView:self]) {
                                 
